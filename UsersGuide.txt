@@ -1,0 +1,99 @@
+Interpreter User's Manual:
+
+Overall Design:
+
+The implementation of the interpreter utilizes three methods to achieve the desired solution. The first method is the Tokenizer. This is the same tokenizer used as before and is in both the Parser and the Interpreter. The second method is the Parser, which in itself utilizes the Tokenizer. This creates the Abstract Parse Tree and allows the Interpreter to not worry about the implementation of the Parser. The last method is the Interpreter itself which contains the code to print and execute the given program and input file. The Interpreter class uses both the Tokenizer and the Parser to execute and print. The Parser implementation is unknown to the Interpreter and as such only the functions provided to the Interpreter by the Parser and the Tokenizer are used.
+
+
+
+Tokenizer Design:
+
+The tokenizer method uses multiple data structures to allow the proper tokenization of the input file. The first data structure used is a hashmap to keep all of the reserved words and special tokens as well as their token numbers. The second data structure is an array of strings which holds on to the tokens in order so that they can be retrieved when needed. Additionally with this implemenation, it would be easy to add a new procedure to allow the tokenizer to go backwards a token.
+There are 5 procedures that are used within the implemenation of the tokenizer:  
+
+1.UpdateTbl(): This procedure builds the hashmap that contains all of the reserved words and special tokens as well as their token numbers. 
+
+2.IsToken(): This function is used extensively in the procedure BuildTokenArray(). As it's name implies, IsToken() takes in a string and determines whether it is a reserved word, special token, whitespace, or not a token at all. This function was made due to the amount of times that a string must be checked to determine if it is a token or not.
+
+3.BuildTokenArray(): This procedure populates the array that holds all of the tokens, it is also the largest and most complex procedure in the tokenizer. This procedure checks for the four types of tokens(IDs, reserved words, special tokens, and numbers) and correctly creates the token, then adds it into the token array.
+
+4.GetNext(): This procedure gives the next token in the sequence of tokens. Returns a blank space when it runs out of tokens
+
+5.SkipToken(): This procedure skips the next token in the sequence of tokens.
+
+
+
+Parser Design:
+
+This Parser was implemented using a recursive descent algorithm based upon the Context Free Grammar given within the course slides. The Parser uses a similar version of the array system that was described in the class in order to build the Abstract Parse Tree. The parser uses an array to represent each of the nodes in the parse tree. The array length is of length 6 and each position has a specific purpose:
+position             Purpose
+[0]			Keeps Track of the current Non Terminal Node Number
+[1]			Keeps Track of the Alternate Node Number
+[2]			Keeps Track of the Left Child Node Number
+[3]			Keeps Track of the Middle Child Node Number
+[4]			Keeps Track of the Right Child Node Number
+[5] 			Keeps Track of the Parent Node Number
+
+ The Parser uses multiple data structures in order to allow for the proper building of the Abstract Parse tree.
+
+PT[][] --> This is the 2D Array that corresponds to the Abstract Parse Tree
+HashMap<Integer,String> IdLookup --> Used to lookup the String name of an ID in the Parse Tree
+HashMap<String,Integer> ValueLookup --> Holds the integer lookup values for each ID
+HashMap<Integer, int[]> IdValues --> The map between the ID and their values.
+	- The int[] is used with 2 values, the first holds the value of the ID, and the second tells if the ID has been initialized. If the ID has been initialized int[1] = 1, otherwise it is 0.
+
+This Parser gives a few public classes that are to be used in the Interpreter so that it can traverse the Parse Tree.
+
+CurrNTNode() --> returns the Current Non Terminal Node Number(used for error checking)
+CurrAlt() --> returns the Alternate Node Number
+GoDownLB() --> traverses down the left child
+GoDownMB() --> traverses down the middle child
+GoDownRB() --> traverses down the right child
+GoUp() --> goes back to the parent node
+CurrIdVal() --> Returns the value of the Id provided the cursor is on an ID node
+SetIdVal(int x) -->Sets the value of the Id provided the cursor is on an ID node
+IdName() --> Returns the string name of the Id of the current node
+ResetCursor() --> sets the cursor back to top of the parse tree
+
+There are also private functions for each non terminal in the context free grammar to allow for the correct recursively descended parsing. These functions are commented and can be seen in the code.
+
+
+
+Interpreter Design:
+
+This Interpreter was implemented using a recursive descent algorithm based upon the Context Free Grammar given within the course slides. It consists of two main parts, the printer and the executor.
+Both the printer and the executor contain private functions for each non terminal in the Context Free Grammar except <let>,<int>,and <digit> as these have no semantic significance. These are all commented and can be seen within the code attached. The Interpreter is given an abstract view of the Parse tree and some functions(described above) to descend, print, and execute the tree.
+
+*Design Choice:
+The printer section contains a design choice that might be a little hard to comprehend. This choice is that the declaration section of the program(the part between "program" and "begin") is not printed from the parse tree. This is because that section is actually not part of the parse tree. The thought process behind this was that because this section is used only for declarations, once the table of declared variables is declared it has no more significance. As such the Parser just creates that table of variables and does not add it to the parse tree. Therefore in order to print this section. The program is merely Tokenized again and then printed until a "begin" token is reached. This seemed to be the simplest way.
+
+
+Running the Interpreter
+
+This Interpreter can be run in one of 2 ways.
+
+1.Because it is a java program and was created in eclipse, it can be run on the eclipse platform. Just take the java files from the submitted folder and add them to a java directory in eclipse. Then alter the run configurations to include the program file and the input file. Then run the Interpreter.java. This takes 2 arguments:
+	1. Program file
+	2. Input file
+
+2.This program is also ported to work in stdsun using the java compiler.
+   1.Run the java compiler on Parser.java, Tokenizer.java, and Interpreter.java with the following command line code:
+		javac Parser.java
+                javac Tokenizer.java
+		javac Interpreter.java
+   2.After the compilation just run the Interpreter with 2 arguments(the program file and input).
+                java Interpreter "programfile" "inputfile"
+   the output of this will be on the main screen and will print the program, then print the results of the program.
+
+
+How it was tested:
+
+In order to test this tokenizer, the test files that were given in the course newsgroup were used. After it was confirmed that all of these worked, variations on these test programs were made to assure that all of the errors that were meant to be caught in the Parser and Interpreter were found.
+The output of the Interpreter was compared to the expected output of the program in order to determine if the functionality was correct.
+
+
+
+
+Known Bugs:
+1.Ids allow a mix of uppercase letters and numbers, but must start with an uppercase letter.
+   ex: A1B2C3 is allowed but 1A2B3C is not allowed.

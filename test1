@@ -1,0 +1,29 @@
+program
+    int VALUE1, VALUE2, FACTOR, FOUND, TEMP1, TEMP2, COUNT;
+begin
+    read VALUE1;
+    read VALUE2;
+    FOUND = 0;
+    if (VALUE1 < VALUE2) then
+        FACTOR = VALUE1;
+    else
+        FACTOR = VALUE2;
+    end;
+    COUNT = FACTOR;
+    while [(FOUND == 0) && (COUNT > 1)] loop
+        TEMP1 = VALUE1;
+        while (TEMP1 >= COUNT) loop
+            TEMP1 = TEMP1 - COUNT;
+        end;
+        TEMP2 = VALUE2;
+        while (TEMP2 >= COUNT) loop
+            TEMP2 = TEMP2 - COUNT;
+        end;
+        if [(TEMP1 == 0) && (TEMP2 == 0)] then
+            FOUND = 1;
+        else
+            COUNT = COUNT - 1;
+        end;
+    end;
+    write COUNT;
+end 
